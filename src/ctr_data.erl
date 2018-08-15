@@ -1,7 +1,5 @@
 -module(ctr_data).
 
--behaviour(ctr_data_if).
-
 -export([
          list_subscriptions/1,
          lookup_subscription/3,
@@ -25,65 +23,71 @@
          init/0
         ]).
 
--define(RUN(Func, Args),
-        ctr_data_if:do_run(Func, Args)).
+-define(SUB_RUN(Func, Args),
+        ctr_data_subscription_if:do_run(Func, Args)).
+-define(PUB_RUN(Func, Args),
+        ctr_data_publication_if:do_run(Func, Args)).
+-define(REG_RUN(Func, Args),
+        ctr_data_registration_if:do_run(Func, Args)).
+-define(INV_RUN(Func, Args),
+        ctr_data_registration_if:do_run(Func, Args)).
 
 list_subscriptions(Realm) ->
-    ?RUN(?FUNCTION_NAME, [Realm]).
+    ?SUB_RUN(?FUNCTION_NAME, [Realm]).
 
 lookup_subscription(Procedure, Options, Realm) ->
-    ?RUN(?FUNCTION_NAME, [Procedure, Options, Realm]).
+    ?SUB_RUN(?FUNCTION_NAME, [Procedure, Options, Realm]).
 
 
 match_subscription(Procedure, Realm) ->
-    ?RUN(?FUNCTION_NAME, [Procedure, Realm]).
+    ?SUB_RUN(?FUNCTION_NAME, [Procedure, Realm]).
 
 
 get_subscription(ProcedureId, Realm) ->
-    ?RUN(?FUNCTION_NAME, [ProcedureId, Realm]).
+    ?SUB_RUN(?FUNCTION_NAME, [ProcedureId, Realm]).
 
 
 add_subscription(Uri, _Match, SessionId, Realm) ->
-    ?RUN(?FUNCTION_NAME, [Uri, _Match, SessionId, Realm]).
+    ?SUB_RUN(?FUNCTION_NAME, [Uri, _Match, SessionId, Realm]).
 
 
 remove_subscription(SubscriptionId, SessionId, Realm) ->
-    ?RUN(?FUNCTION_NAME, [SubscriptionId, SessionId, Realm]).
+    ?SUB_RUN(?FUNCTION_NAME, [SubscriptionId, SessionId, Realm]).
 
 
 store_publication(Publication) ->
-    ?RUN(?FUNCTION_NAME, [Publication]).
+    ?PUB_RUN(?FUNCTION_NAME, [Publication]).
 
 
 list_registrations(Realm) ->
-    ?RUN(?FUNCTION_NAME, [Realm]).
+    ?REG_RUN(?FUNCTION_NAME, [Realm]).
 
 
 lookup_registration(Procedure, Options, Realm) ->
-    ?RUN(?FUNCTION_NAME, [Procedure, Options, Realm]).
+    ?REG_RUN(?FUNCTION_NAME, [Procedure, Options, Realm]).
 
 
 match_registration(Procedure, Realm) ->
-    ?RUN(?FUNCTION_NAME, [Procedure, Realm]).
+    ?REG_RUN(?FUNCTION_NAME, [Procedure, Realm]).
 
 get_registration(ProcedureId, Realm) ->
-    ?RUN(?FUNCTION_NAME, [ProcedureId, Realm]).
+    ?REG_RUN(?FUNCTION_NAME, [ProcedureId, Realm]).
 
 
 add_registration(Procedure, Match, SessionId, Realm) ->
-    ?RUN(?FUNCTION_NAME, [Procedure, Match, SessionId, Realm]).
+    ?REG_RUN(?FUNCTION_NAME, [Procedure, Match, SessionId, Realm]).
 
 remove_registration(RegistrationId, SessionId, Realm) ->
-    ?RUN(?FUNCTION_NAME, [RegistrationId, SessionId, Realm]).
+    ?REG_RUN(?FUNCTION_NAME, [RegistrationId, SessionId, Realm]).
 
 add_invocation(Invocation) ->
-    ?RUN(?FUNCTION_NAME, [Invocation]).
+    ?INV_RUN(?FUNCTION_NAME, [Invocation]).
 
 get_invocation(InvocationId, Realm) ->
-    ?RUN(?FUNCTION_NAME, [InvocationId, Realm]).
+    ?INV_RUN(?FUNCTION_NAME, [InvocationId, Realm]).
 
 remove_invocation(InvocationId, Realm) ->
-    ?RUN(?FUNCTION_NAME, [InvocationId, Realm]).
+    ?INV_RUN(?FUNCTION_NAME, [InvocationId, Realm]).
 
 init() ->
     ctr_data_if:initialize().

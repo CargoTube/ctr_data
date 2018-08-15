@@ -1,6 +1,9 @@
 -module(ctr_data_off).
 
--behaviour(ctr_gen_data).
+-behaviour(ctr_data_subscription_if).
+-behaviour(ctr_data_publication_if).
+-behaviour(ctr_data_registration_if).
+-behaviour(ctr_data_invocation_if).
 
 -export([
          list_subscriptions/1,
