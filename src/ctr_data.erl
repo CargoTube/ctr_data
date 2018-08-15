@@ -90,4 +90,8 @@ remove_invocation(InvocationId, Realm) ->
     ?INV_RUN(?FUNCTION_NAME, [InvocationId, Realm]).
 
 init() ->
-    ctr_data_if:initialize().
+    ctr_data_subscription_if:initialize(),
+    ctr_data_publication_if:initialize(),
+    ctr_data_registration_if:initialize(),
+    ctr_data_invocation_if:initialize(),
+    ok.
