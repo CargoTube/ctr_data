@@ -244,7 +244,7 @@ create_table() ->
     {atomic, ok} = mnesia:create_table(ctr_registration, RegDef),
     mnesia:delete_table(ctrd_invocation),
     InvDef = [{attributes, record_info(fields, ctrd_invocation)},
-              {disc_copies, [node()]},
+              {ram_copies, [node()]},
               {index, [realm]}
              ],
     {atomic, ok} = mnesia:create_table(ctrd_invocation, InvDef),
