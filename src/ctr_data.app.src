@@ -1,0 +1,18 @@
+{application, ctr_data,
+ [{description, "CargoTube Router Data"},
+  {vsn, "semver"},
+  {mod, {ctr_data_app, []}},
+  {registered, [ctr_data_sup]},
+  {applications,
+   [kernel,
+    stdlib,
+    lager,
+    mnesia,
+    iso8601
+   ]},
+  {env,[]},
+  {modules, []},
+  {maintainers, []},
+  {licenses, []},
+  {links, []}
+ ]}.
