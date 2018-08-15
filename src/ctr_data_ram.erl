@@ -94,7 +94,7 @@ remove_invocation(InvocationId, Realm) ->
     ctr_data_ram_dealer:delete_invocation(InvocationId, Realm).
 
 init() ->
-    ctr_data_utils:create_mnesia_schema_if_needed(),
+    ct_data_util:create_mnesia_schema_if_needed(),
     ctr_data_ram_broker:init(),
     ctr_data_ram_dealer:init(),
     ok.
