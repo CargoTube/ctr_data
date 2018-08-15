@@ -1,4 +1,4 @@
--module(ctr_gen_data_off).
+-module(ctr_data_off).
 
 -behaviour(ctr_gen_data).
 
