@@ -8,22 +8,6 @@
          create_mnesia_schema_if_needed/0
         ]).
 
-%% init() ->
-%%     Dir = application:get_env(ct_router, mnesia_dir, ?DBDIR),
-%%     DirExists = filelib:is_dir(Dir),
-%%     ok = stop_mnesia(),
-%%     ok = create_schema_if_needed(DirExists),
-%%     ok = start_mnesia(),
-%%     ok = init_tables(),
-%%     ok.
-
-%% init_tables() ->
-%%     cta_session:init(),
-%%     cta_realm:init(),
-%%     ctr_gen_data:initialize(),
-%%     ok.
-
-
 stop_mnesia() ->
     application:stop(mnesia),
     MnesiaDir = mnesia_dir(),
