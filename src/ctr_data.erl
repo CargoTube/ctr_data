@@ -47,8 +47,8 @@ get_subscription(ProcedureId, Realm) ->
     ?SUB_RUN(?FUNCTION_NAME, [ProcedureId, Realm]).
 
 
-add_subscription(Uri, _Match, SessionId, Realm) ->
-    ?SUB_RUN(?FUNCTION_NAME, [Uri, _Match, SessionId, Realm]).
+add_subscription(Uri, Match, SessionId, Realm) ->
+    ?SUB_RUN(?FUNCTION_NAME, [Uri, Match, SessionId, Realm]).
 
 
 remove_subscription(SubscriptionId, SessionId, Realm) ->
