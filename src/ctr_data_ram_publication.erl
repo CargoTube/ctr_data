@@ -14,13 +14,13 @@ init() ->
     create_table().
 
 
-store_publication(Pub0) ->
+store_publication(Pub) ->
     #ctr_publication{
        realm = Realm,
        topic = Topic
-      } = Pub0,
+      } = Pub,
     NewPubId = ctr_utils:gen_global_id(),
-    NewPub = Pub0#ctr_publication{id = NewPubId},
+    NewPub = Pub#ctr_publication{id = NewPubId},
     MatchHead = #ctr_subscription{uri=Topic, realm=Realm, _='_'},
     Guard = [],
     GiveObject = ['$_'],
@@ -48,7 +48,7 @@ store_publication(Pub0) ->
                 end
         end,
     Result = mnesia:transaction(LookupAndStore),
-    handle_publication_store_result(Result, Pub0).
+    handle_publication_store_result(Result, Pub).
 
 
 handle_publication_store_result({atomic, {ok, Publication}}, _Pub0) ->

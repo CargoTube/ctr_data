@@ -42,6 +42,7 @@
           caller_sess_id = undefined,
           caller_req_id = undefined,
           reg_id = undefined,
+          ts = undefined,
           procedure = <<>>,
           callees = [],
           results = [],
