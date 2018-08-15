@@ -30,7 +30,7 @@
 -define(REG_RUN(Func, Args),
         ctr_data_registration_if:do_run(Func, Args)).
 -define(INV_RUN(Func, Args),
-        ctr_data_registration_if:do_run(Func, Args)).
+        ctr_data_invocation_if:do_run(Func, Args)).
 
 list_subscriptions(Realm) ->
     ?SUB_RUN(?FUNCTION_NAME, [Realm]).
