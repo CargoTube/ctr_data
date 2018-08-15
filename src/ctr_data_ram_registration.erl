@@ -9,8 +9,8 @@
          match_registration/2,
          get_registration/2,
 
-         store_registration/1,
-         delete_registration/2,
+         add_registration/4,
+         remove_registration/3,
 
          init/0
         ]).
@@ -18,6 +18,17 @@
 
 init() ->
     create_table().
+
+add_registration(Procedure, _Match, SessionId, Realm) ->
+    NewId = ctr_utils:gen_global_id(),
+    NewReg = #ctr_registration{
+                id = NewId,
+                procedure = Procedure,
+                realm = Realm,
+                created = calendar:universal_time(),
+                callee_sess_ids = [SessionId]
+               },
+    store_registration(NewReg).
 
 store_registration(Registration) ->
     #ctr_registration{
@@ -151,7 +162,7 @@ handle_find_result({atomic, {error, not_found}}) ->
     {error, not_found}.
 
 
-delete_registration(RegId, SessId) ->
+remove_registration(RegId, SessId, _Realm) ->
     DeleteIfEmpty =
         fun([], RegistrationId, Registration) ->
                 mnesia:delete({ctr_registration, RegistrationId}),

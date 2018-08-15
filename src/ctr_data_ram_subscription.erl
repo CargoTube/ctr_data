@@ -8,8 +8,8 @@
          match_subscription/2,
          get_subscription/2,
 
-         add_subscription/3,
-         delete_subscription/2,
+         add_subscription/4,
+         remove_subscription/3,
 
          init/0,
 
@@ -104,11 +104,12 @@ handle_subscription_list_result(Other) ->
     {ok, []}.
 
 
-add_subscription(Uri, SessionId, Realm) ->
+add_subscription(Uri, _Match, SessionId, Realm) ->
     NewId = ctr_utils:gen_global_id(),
     NewSub = #ctr_subscription{id = NewId,
                                uri = Uri,
                                realm = Realm,
+                               match = exact,
                                subscribers = [SessionId],
                                created = calendar:universal_time()
                               },
@@ -153,10 +154,10 @@ handle_store_result({atomic, {added, Subscription}}, _) ->
     {added, Subscription};
 handle_store_result({atomic, {error, id_exists}}, Subscription) ->
     #ctr_subscription{ realm = Realm, subscribers = [SessionId],
-                       uri = Uri} = Subscription,
-    add_subscription(Uri, Realm, SessionId).
+                       uri = Uri, match = Match } = Subscription,
+    add_subscription(Uri, Match, Realm, SessionId).
 
-delete_subscription(SubId, SessionId) ->
+remove_subscription(SubId, SessionId, _Realm) ->
     DeleteOrUpdateSubscription =
         fun([], Subscription) ->
                 mnesia:delete({ctr_subscription, SubId}),

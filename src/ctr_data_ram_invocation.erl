@@ -4,7 +4,7 @@
 -include("ctr_data.hrl").
 
 -export([
-         store_invocation/1,
+         add_invocation/1,
          get_invocation/2,
          delete_invocation/1,
 
@@ -16,7 +16,7 @@ init() ->
     create_table().
 
 
-store_invocation(Invoc) ->
+add_invocation(Invoc) ->
     NewId = ctr_utils:gen_global_id(),
     NewInvoc = Invoc#ctrd_invocation{id = NewId},
     StoreInvocation =
@@ -36,7 +36,7 @@ store_invocation(Invoc) ->
 handle_invocation_store_result({atomic, {ok, Invoc}}, _) ->
     {ok, Invoc};
 handle_invocation_store_result({atomic, {error, id_exists}}, Invoc) ->
-    store_invocation(Invoc).
+    add_invocation(Invoc).
 
 get_invocation(InvocationId, _Realm) ->
     FindInvocation =
