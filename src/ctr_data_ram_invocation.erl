@@ -51,8 +51,8 @@ invocation_add_result(Result, InvocationId) ->
                     _ -> {error, not_found}
                 end
         end,
-    Result = mnesia:transaction(FindInvocation),
-    handle_add_result_result(Result).
+    AddResult = mnesia:transaction(FindInvocation),
+    handle_add_result_result(AddResult).
 
 
 handle_add_result_result({atomic, {ok, Invoc}}) ->
