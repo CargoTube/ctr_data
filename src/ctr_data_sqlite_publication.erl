@@ -36,13 +36,12 @@ store_publication(Pub) ->
 
 handle_publication_store_result([], Publication) ->
     {ok, Publication};
-handle_publication_store_result({atomic, {error, pub_id_exists}}, Pub) ->
+handle_publication_store_result(
+  {error,{constraint,"UNIQUE constraint failed: ctrpublication.id"}}, Pub) ->
     NewPubId = ctr_utils:gen_global_id(),
     NewPub = Pub#ctr_publication{id = NewPubId},
     Result = do_store(NewPub),
-    handle_publication_store_result(Result, NewPub);
-handle_publication_store_result(Other, _NewPub) ->
-    {error, Other}.
+    handle_publication_store_result(Result, NewPub).
 
 
 
