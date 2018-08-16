@@ -1,4 +1,6 @@
 
+
+
 -record(ctr_realm, {name = undefined,
                     authmethods = [],
                     authmapping = []
@@ -22,7 +24,6 @@
           realm = undefined,
           topic = undefined,
           ts = undefined,
-          sub_id = undefined,
           arguments = undefined,
           argumentskw = undefined
          }).
