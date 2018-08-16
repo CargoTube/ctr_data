@@ -22,6 +22,7 @@
          remove_registration/3,
 
          add_invocation/1,
+         invocation_add_result/3,
          get_invocation/2,
          remove_invocation/2,
 
@@ -81,6 +82,9 @@ remove_registration(_RegistrationId, _SessionId, _Realm) ->
 
 add_invocation(_Invocation) ->
     {error, not_implemented}.
+
+invocation_add_result(_Result, _InvocationId, _Realm) ->
+    {error, not_found}.
 
 get_invocation(_InvocationId, _Realm) ->
     {error, not_found}.
