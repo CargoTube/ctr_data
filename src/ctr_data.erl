@@ -17,7 +17,7 @@
          remove_registration/3,
 
          add_invocation/1,
-         update_invocation/1,
+         invocation_add_result/2,
          get_invocation/2,
          remove_invocation/2,
 
@@ -84,8 +84,8 @@ remove_registration(RegistrationId, SessionId, Realm) ->
 add_invocation(Invocation) ->
     ?INV_RUN(?FUNCTION_NAME, [Invocation]).
 
-update_invocation(Invocation) ->
-    ?INV_RUN(?FUNCTION_NAME, [Invocation]).
+invocation_add_result(Result, InvocationId) ->
+    ?INV_RUN(?FUNCTION_NAME, [Result, InvocationId]).
 
 get_invocation(InvocationId, Realm) ->
     ?INV_RUN(?FUNCTION_NAME, [InvocationId, Realm]).

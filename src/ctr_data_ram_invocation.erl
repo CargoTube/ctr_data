@@ -5,7 +5,7 @@
 
 -export([
          add_invocation/1,
-         update_invocation/1,
+         invocation_add_result/2,
          get_invocation/2,
          delete_invocation/1,
 
@@ -39,25 +39,25 @@ handle_invocation_store_result({atomic, {ok, Invoc}}, _) ->
 handle_invocation_store_result({atomic, {error, id_exists}}, Invoc) ->
     add_invocation(Invoc).
 
-
-update_invocation(#ctrd_invocation{id = Id} = Invoc) ->
-    StoreInvocation =
+invocation_add_result(Result, InvocationId) ->
+    FindInvocation =
         fun() ->
-                case mnesia:wread({ctrd_invocation, Id}) of
-                    [_] ->
-                        ok = mnesia:write(Invoc),
-                        {ok, Invoc};
-                    [] ->
-                        {error, not_found}
+                case mnesia:wread({ctrd_invocation, InvocationId}) of
+                    [#ctrd_invocation{results = Results } = Invoc] ->
+                        NewResults = Results ++ [Result],
+                        NewInvoc = Invoc#ctrd_invocation{results = NewResults},
+                        ok = mnesia:write(NewInvoc),
+                        {ok, NewInvoc};
+                    _ -> {error, not_found}
                 end
         end,
-    Result = mnesia:transaction(StoreInvocation),
-    handle_invocation_update_result(Result).
+    Result = mnesia:transaction(FindInvocation),
+    handle_add_result_result(Result).
 
 
-handle_invocation_update_result({atomic, {ok, Invoc}}) ->
+handle_add_result_result({atomic, {ok, Invoc}}) ->
     {ok, Invoc};
-handle_invocation_update_result({atomic, {error, Reason}}) ->
+handle_add_result_result({atomic, {error, Reason}}) ->
     {error, Reason}.
 
 get_invocation(InvocationId, _Realm) ->
