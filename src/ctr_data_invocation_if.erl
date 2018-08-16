@@ -22,7 +22,8 @@
 -callback add_invocation( Invocation :: invocation() ) ->
     {ok, UpdatedInvocation :: invocation()}.
 
--callback invocation_add_result( Result :: any(), InvocationId :: id() ) ->
+-callback invocation_add_result( Result :: any(), InvocationId :: id(),
+                                 Realm :: uri() ) ->
     {ok, UpdatedInvocation :: invocation()} | {error, not_found}.
 
 -callback get_invocation(InvocationId :: id(), Realm :: uri()) ->
