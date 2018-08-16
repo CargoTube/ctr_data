@@ -44,6 +44,9 @@
           reg_id = undefined,
           ts = undefined,
           procedure = <<>>,
+          options = #{},
+          arguments = undefined,
+          argumentskw = undefined,
           callees = [],
           results = [],
           realm = undefined
