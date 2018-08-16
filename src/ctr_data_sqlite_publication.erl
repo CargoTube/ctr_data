@@ -62,15 +62,22 @@ do_store(#ctr_publication{id = Id, pub_sess_id = PubSessId, options = Options,
 create_table() ->
     ok = ct_data_util:setup_sqlite_if_needed(),
     Version = ct_data_util:get_table_version("ctrpublication"),
-    maybe_create_table(Version).
+    ok = maybe_drop_table(Version),
+    ok = do_create_table(),
+    ok.
 
 
-maybe_create_table({ok, Version}) when Version == ?TABLEVERSION ->
+maybe_drop_table({ok, Version}) when Version == ?TABLEVERSION ->
     ok;
-maybe_create_table(_) ->
+maybe_drop_table(_) ->
     {ok, Con} = ct_data_util:get_sqlite_connection(),
-    Sql = "DROP TABLE IF EXISTS ctrpublication;"
-        "CREATE TABLE ctrpublication ("
+    Sql = "DROP TABLE IF EXISTS ctrpublication;",
+    ok = esqlite3:exec(Sql, Con),
+    ok.
+
+do_create_table() ->
+    {ok, Con} = ct_data_util:get_sqlite_connection(),
+     Sql =  "CREATE TABLE IF NOT EXISTS ctrpublication ("
         " id INTEGER PRIMARY KEY, "
         " pub_sess_id  INTEGER NOT NULL, "
         " options TEXT, "
@@ -82,7 +89,6 @@ maybe_create_table(_) ->
         " arguments TEXT, "
         " argumentskw TEXT "
         ");",
-    Params = [],
-    [] = esqlite3:q(Sql, Params, Con),
+    ok = esqlite3:exec(Sql, Con),
     ok = ct_data_util:set_table_version("ctrpublication",?TABLEVERSION),
     ok.
