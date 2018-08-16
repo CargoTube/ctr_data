@@ -19,8 +19,7 @@ store_publication(Pub) ->
        realm = Realm,
        topic = Topic
       } = Pub,
-    %% NewPubId = ctr_utils:gen_global_id(),
-    NewPubId = 123,
+    NewPubId = ctr_utils:gen_global_id(),
     CollectSubs =
         fun(#ctr_subscription{id = SubId, match=Match,
                               subscribers = Subs}, AllSubs) ->
