@@ -216,6 +216,7 @@ dump_all() ->
 
 
 create_table() ->
+    ct_data_util:create_mnesia_schema_if_needed(),
     mnesia:delete_table(ctr_subscription),
     SubDef = [{attributes, record_info(fields, ctr_subscription)},
               {ram_copies, [node()]},

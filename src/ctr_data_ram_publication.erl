@@ -68,6 +68,7 @@ dump_all() ->
 
 
 create_table() ->
+    ct_data_util:create_mnesia_schema_if_needed(),
     mnesia:delete_table(ctr_publication),
     PubDef = [{attributes, record_info(fields, ctr_publication)},
               {ram_copies, [node()]},

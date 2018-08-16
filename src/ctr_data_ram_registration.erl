@@ -190,6 +190,7 @@ remove_registration(RegId, SessId, _Realm) ->
 
 
 create_table() ->
+    ct_data_util:create_mnesia_schema_if_needed(),
     mnesia:delete_table(ctr_registration),
     RegDef = [{attributes, record_info(fields, ctr_registration)},
               {ram_copies, [node()]},

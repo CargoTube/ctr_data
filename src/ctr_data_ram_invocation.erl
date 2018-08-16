@@ -94,6 +94,7 @@ handle_invocation_remove_result(Error) ->
 
 
 create_table() ->
+    ct_data_util:create_mnesia_schema_if_needed(),
     mnesia:delete_table(ctrd_invocation),
     InvDef = [{attributes, record_info(fields, ctrd_invocation)},
               {ram_copies, [node()]},
