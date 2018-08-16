@@ -21,28 +21,22 @@ store_publication(Pub) ->
       } = Pub,
     NewPubId = ctr_utils:gen_global_id(),
     NewPub = Pub#ctr_publication{id = NewPubId},
-    MatchHead = #ctr_subscription{uri=Topic, realm=Realm, _='_'},
-    Guard = [],
-    GiveObject = ['$_'],
-    MatSpec = [{MatchHead, Guard, GiveObject}],
 
-
-    UpdateOrWriteNew =
-        fun([#ctr_subscription{id = SubId, subscribers = Subs}]) ->
-                UpdatedPub = NewPub#ctr_publication{sub_id=SubId, subs = Subs},
-                ok = mnesia:write(UpdatedPub),
-                {ok, UpdatedPub};
-           ([]) ->
-                ok = mnesia:write(NewPub),
-                {ok, NewPub}
+    CollectSubs =
+        fun(#ctr_subscription{id = SubId, match=Match,
+                              subscribers = Subs}, AllSubs) ->
+                [ {SubId, Match,  Subs}  | AllSubs ]
         end,
 
     LookupAndStore =
         fun() ->
                 case mnesia:wread({ctr_publication, NewPubId}) of
                     [] ->
-                        Found = mnesia:select(ctr_subscription, MatSpec, write),
-                        UpdateOrWriteNew(Found);
+                        {ok, Found} = ctr_data:match_subscription(Topic, Realm),
+                        AllSubs = lists:foldl(CollectSubs, [], Found),
+                        UpdatedPub = NewPub#ctr_publication{subs = AllSubs},
+                        ok = mnesia:write(UpdatedPub),
+                        {ok, UpdatedPub};
                     _ ->
                         {error, pub_id_exists}
                 end

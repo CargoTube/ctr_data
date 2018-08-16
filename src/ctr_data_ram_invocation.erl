@@ -5,7 +5,7 @@
 
 -export([
          add_invocation/1,
-         invocation_add_result/2,
+         invocation_add_result/3,
          get_invocation/2,
          remove_invocation/2,
 
@@ -39,7 +39,7 @@ handle_invocation_store_result({atomic, {ok, Invoc}}, _) ->
 handle_invocation_store_result({atomic, {error, id_exists}}, Invoc) ->
     add_invocation(Invoc).
 
-invocation_add_result(Result, InvocationId) ->
+invocation_add_result(Result, InvocationId, _Realm) ->
     FindInvocation =
         fun() ->
                 case mnesia:wread({ctrd_invocation, InvocationId}) of

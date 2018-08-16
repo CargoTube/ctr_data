@@ -54,6 +54,11 @@ list_subscriptions(Realm) ->
     Result = mnesia:transaction(Lookup),
     handle_subscription_list_result(Result).
 
+handle_subscription_list_result({atomic, {ok, List}}) ->
+    {ok, List};
+handle_subscription_list_result(Other) ->
+    lager:error("subscription get list error: ~p", Other),
+    {ok, []}.
 
 match_subscription(Topic, Realm) ->
     MatchHead = #ctr_subscription{realm=Realm, uri=Topic, _='_'},
@@ -70,7 +75,13 @@ match_subscription(Topic, Realm) ->
                 end
         end,
     Result = mnesia:transaction(Lookup),
-    handle_subscription_list_result(Result).
+    handle_subscription_match_result(Result).
+
+handle_subscription_match_result({atomic, {ok, List}}) ->
+    {ok, List};
+handle_subscription_match_result(Other) ->
+    lager:error("subscription match error: ~p", Other),
+    {ok, []}.
 
 lookup_subscription(Topic, Options , Realm) ->
     Match = maps:get(match, Options, exact),
@@ -97,11 +108,6 @@ handle_subscription_get_result(Other) ->
     lager:error("subscription get/lookup error: ~p", Other),
     {error, not_found}.
 
-handle_subscription_list_result({atomic, {ok, List}}) ->
-    {ok, List};
-handle_subscription_list_result(Other) ->
-    lager:error("subscription get list/match error: ~p", Other),
-    {ok, []}.
 
 
 add_subscription(Uri, _Match, SessionId, Realm) ->
