@@ -34,7 +34,7 @@ store_publication(Pub) ->
     handle_publication_store_result(Result, NewPub).
 
 
-handle_publication_store_result(ok, Publication) ->
+handle_publication_store_result([], Publication) ->
     {ok, Publication};
 handle_publication_store_result({atomic, {error, pub_id_exists}}, Pub) ->
     NewPubId = ctr_utils:gen_global_id(),
@@ -54,10 +54,15 @@ do_store(#ctr_publication{id = Id, pub_sess_id = PubSessId, options = Options,
     Sql = "INSERT INTO ctrpublication (id, pub_sess_id, options, details, subs,"
         " realm, topic, ts, arguments, argumentskw) "
         " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-    Params = [Id, PubSessId, Options, Details, Subs, Realm, Topic, TS,
-              Arguments, ArgumentsKw],
+    Params = [Id, PubSessId, to_text(Options), to_text(Details), to_text(Subs),
+              Realm, Topic, iso8601:format(TS), to_text(Arguments),
+              to_text(ArgumentsKw)],
     {ok, Con} = ct_data_util:get_sqlite_connection(),
     esqlite3:q(Sql, Params, Con).
+
+
+to_text(Any) ->
+    io_lib:format("~p", [Any]).
 
 create_table() ->
     ok = ct_data_util:setup_sqlite_if_needed(),
