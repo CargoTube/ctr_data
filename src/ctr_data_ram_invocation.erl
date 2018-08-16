@@ -7,7 +7,7 @@
          add_invocation/1,
          invocation_add_result/2,
          get_invocation/2,
-         delete_invocation/1,
+         remove_invocation/2,
 
          init/0
         ]).
@@ -79,17 +79,17 @@ handle_invocation_find_result(_) ->
 
 
 
-delete_invocation(#ctrd_invocation{id=Id}) ->
+remove_invocation(Id, _Realm) ->
     DeleteInvocation =
         fun() ->
                 mnesia:delete({ctrd_invocation, Id})
         end,
     Result = mnesia:transaction(DeleteInvocation),
-    handle_invocation_delete_result(Result).
+    handle_invocation_remove_result(Result).
 
-handle_invocation_delete_result({atomic, ok}) ->
+handle_invocation_remove_result({atomic, ok}) ->
     ok;
-handle_invocation_delete_result(Error) ->
+handle_invocation_remove_result(Error) ->
     {error, Error}.
 
 
