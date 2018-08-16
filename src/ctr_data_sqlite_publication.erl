@@ -83,6 +83,6 @@ maybe_create_table(_) ->
         " argumentskw TEXT "
         ");",
     Params = [],
-    [] = esqlite:q(Sql, Params, Con),
+    [] = esqlite3:q(Sql, Params, Con),
     ok = ct_data_util:set_table_version("ctrpublication",?TABLEVERSION),
     ok.
