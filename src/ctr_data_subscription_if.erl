@@ -32,7 +32,7 @@
 
 
 -callback match_subscription(Procedure :: uri(), Realm :: uri()) ->
-    {ok, subscription()} | {error, Reason :: error_reason()}.
+    {ok, [subscription()] } | {error, Reason :: error_reason()}.
 
 
 -callback get_subscription(ProcedureId :: id(), Realm :: uri()) ->
