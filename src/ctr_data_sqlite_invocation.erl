@@ -52,9 +52,9 @@ do_store(#ctrd_invocation{id = Id, caller_sess_id = CallerSessId,
 
 get_invocation(InvocationId, Realm) ->
     {ok, Con} = ct_data_util:get_sqlite_connection(),
-    Sql = "SELECT (id, caller_sess_id, caller_req_id, "
+    Sql = "SELECT id, caller_sess_id, caller_req_id, "
         "reg_id, ts, procedure, options, arguments, argumentskw, callees, "
-        " realm) "
+        " realm "
         "FROM ctrinvocation WHERE id = ? AND realm = ?;",
     Params = [InvocationId, Realm],
     Result = esqlite3:q(Sql, Params, Con),
