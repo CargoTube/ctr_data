@@ -179,7 +179,7 @@ do_create_table() ->
 
 maybe_clean_table(true, MaxAge) ->
     {ok, Con} = ct_data_util:get_sqlite_connection(),
-    Now = iso8601:format(calendar:universaltime()),
+    Now = iso8601:format(calendar:universal_time()),
     ok = delete_results(MaxAge, Now, Con),
     ok = delete_invocations(MaxAge, Now, Con);
 maybe_clean_table(_, _MaxAge) ->
