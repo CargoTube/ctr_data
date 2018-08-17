@@ -81,7 +81,7 @@ handle_invocation_get_result(_) ->
 invocation_add_result(Result, InvocationId, Realm) ->
     Sql = "INSERT INTO ctrinvocation_result (invoc_id, realm, result) "
         " VALUES (?, ?, ?);",
-    Params = [ InvocationId, Realm, to_json(Result)],
+    Params = [ InvocationId, Realm, to_text(Result)],
     {ok, Con} = ct_data_util:get_sqlite_connection(),
     AddResult = esqlite3:q(Sql, Params, Con),
     handle_add_result_result(AddResult).
@@ -109,6 +109,9 @@ handle_invocation_remove_result(Error) ->
 
 to_json(Any) ->
     jsone:encode(Any).
+
+to_text(Any) ->
+    io_lib:format("~p", [Any]).
 
 from_json(Json) ->
     jsone:decode(Json).
