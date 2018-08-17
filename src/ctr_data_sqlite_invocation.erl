@@ -3,6 +3,7 @@
 
 -include("ctr_data.hrl").
 -define(TABLEVERSION, 0.1).
+-define(TABLENAME, "ctrinvocation").
 
 -export([
          add_invocation/1,
@@ -33,6 +34,7 @@ handle_invocation_store_result(
     NewInvoc = Invoc#ctrd_invocation{id = NewId},
     Result = do_store(NewInvoc),
     handle_invocation_store_result(Result, NewInvoc).
+
 
 do_store(#ctrd_invocation{id = Id, caller_sess_id = CallerSessId,
                           caller_req_id = CallerReqId, reg_id = RegId,
@@ -95,17 +97,17 @@ handle_add_result_result(Reason) ->
 
 remove_invocation(Id, Realm) ->
     {ok, Con} = ct_data_util:get_sqlite_connection(),
-    Sql = "DELETE FROM ctrinvocation WHERE  id = ? AND realm = ? ;"
-        " DELETE FROM ctrinvocation_result WHERE  invoc_id = ? AND realm = ? ;",
-    Params = [Id, Realm, Id, Realm],
-    Result = esqlite3:q(Sql, Params, Con),
-    handle_invocation_remove_result(Result).
+    Sql = "DELETE FROM ctrinvocation WHERE  id = ? AND realm = ? ;",
+    Params = [Id, Realm],
+    [] = esqlite3:q(Sql, Params, Con),
+    ok = remove_invocation_results(Id, Realm, Con),
+    ok.
 
-handle_invocation_remove_result([]) ->
-    ok;
-handle_invocation_remove_result(Error) ->
-    {error, Error}.
-
+remove_invocation_results(Id, Realm, Con) ->
+    Sql= "DELETE FROM ctrinvocation_result WHERE  invoc_id = ? AND realm = ? ;",
+    Params = [Id, Realm],
+    [] = esqlite3:q(Sql, Params, Con),
+    ok.
 
 to_json(Any) ->
     jsone:encode(Any).
@@ -118,7 +120,7 @@ from_json(Json) ->
 
 create_table() ->
     ok = ct_data_util:setup_sqlite_if_needed(),
-    Version = ct_data_util:get_table_version("ctrpublication"),
+    Version = ct_data_util:get_table_version(?TABLENAME),
     ok = maybe_drop_table(Version),
     ok = do_create_table(),
     ok.
@@ -154,5 +156,5 @@ do_create_table() ->
         " result TEXT NOT NULL"
         "); " ,
     ok = esqlite3:exec(Sql, Con),
-    ok = ct_data_util:set_table_version("ctrpublication",?TABLEVERSION),
+    ok = ct_data_util:set_table_version(?TABLENAME,?TABLEVERSION),
     ok.

@@ -4,6 +4,7 @@
 -include("ctr_data.hrl").
 
 -define(TABLEVERSION,0.1).
+-define(TABLENAME,"ctrpublication").
 
 -export([
          store_publication/1,
@@ -68,7 +69,7 @@ to_json(Any) ->
 
 create_table() ->
     ok = ct_data_util:setup_sqlite_if_needed(),
-    Version = ct_data_util:get_table_version("ctrpublication"),
+    Version = ct_data_util:get_table_version(?TABLENAME),
     ok = maybe_drop_table(Version),
     ok = do_create_table(),
     ok.
@@ -97,5 +98,5 @@ do_create_table() ->
         " argumentskw TEXT "
         ");",
     ok = esqlite3:exec(Sql, Con),
-    ok = ct_data_util:set_table_version("ctrpublication",?TABLEVERSION),
+    ok = ct_data_util:set_table_version(?TABLENAME,?TABLEVERSION),
     ok.
