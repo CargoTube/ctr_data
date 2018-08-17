@@ -24,7 +24,7 @@
 
 -callback invocation_add_result( Result :: any(), InvocationId :: id(),
                                  Realm :: uri() ) ->
-    {ok, UpdatedInvocation :: invocation()} | {error, not_found}.
+    ok | {error, not_found}.
 
 -callback get_invocation(InvocationId :: id(), Realm :: uri()) ->
     {ok, Invocation :: invocation()} | {error, Reason :: error_reason()}.

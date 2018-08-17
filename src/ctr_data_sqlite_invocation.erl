@@ -6,8 +6,9 @@
 
 -export([
          add_invocation/1,
+         invocation_add_result/3,
          get_invocation/2,
-         remove_invocation/1,
+         remove_invocation/2,
 
          init/0
         ]).
@@ -77,11 +78,26 @@ handle_invocation_get_result(_) ->
     {error, not_found}.
 
 
-
-remove_invocation(#ctrd_invocation{id=Id, realm=Realm}) ->
+invocation_add_result(Result, InvocationId, Realm) ->
+    Sql = "INSERT INTO ctrinvocation_result (invoc_id, realm, result) "
+        " VALUES (?, ?, ?);",
+    Params = [ InvocationId, Realm, to_json(Result)],
     {ok, Con} = ct_data_util:get_sqlite_connection(),
-    Sql = "DELETE FROM ctrinvocation WHERE ( id = ?, realm = ? ) ;",
-    Params = [Id, Realm],
+    AddResult = esqlite3:q(Sql, Params, Con),
+    handle_add_result_result(AddResult).
+
+
+handle_add_result_result([]) ->
+    ok;
+handle_add_result_result(Reason) ->
+    {error, Reason}.
+
+
+remove_invocation(Id, Realm) ->
+    {ok, Con} = ct_data_util:get_sqlite_connection(),
+    Sql = "DELETE FROM ctrinvocation WHERE ( id = ?, realm = ? ) ;"
+        " DELETE FROM ctrinvocation_result WHERE ( invoc_id = ?, realm = ? );",
+    Params = [Id, Realm, Id, Realm],
     Result = esqlite3:q(Sql, Params, Con),
     handle_invocation_remove_result(Result).
 

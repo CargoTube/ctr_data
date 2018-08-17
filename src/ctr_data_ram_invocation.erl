@@ -47,7 +47,7 @@ invocation_add_result(Result, InvocationId, _Realm) ->
                         NewResults = Results ++ [Result],
                         NewInvoc = Invoc#ctrd_invocation{results = NewResults},
                         ok = mnesia:write(NewInvoc),
-                        {ok, NewInvoc};
+                        ok;
                     _ -> {error, not_found}
                 end
         end,
@@ -55,8 +55,8 @@ invocation_add_result(Result, InvocationId, _Realm) ->
     handle_add_result_result(AddResult).
 
 
-handle_add_result_result({atomic, {ok, Invoc}}) ->
-    {ok, Invoc};
+handle_add_result_result({atomic, ok}) ->
+    ok;
 handle_add_result_result({atomic, {error, Reason}}) ->
     {error, Reason}.
 
