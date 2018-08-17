@@ -38,13 +38,11 @@ init(no_param) ->
     {ok, waiting, #data{}}.
 
 
-handle_event(cast, start, waiting, #data{max_age = MaxAge, interval=Intv}) ->
+handle_event(cast, start, _State, #data{max_age = MaxAge, interval=Intv}) ->
     MaxAge = application:get_env(ctr_data, sqlite_clean_max_age, MaxAge),
     Interval = application:get_env(ctr_data, sqlite_clean_interval, Intv)*1000,
     {next_state, running, #data{max_age=MaxAge, interval=Interval},
      [{timeout, 15000, clean}] };
-handle_event(cast, start, _State, #data{interval=Interval} = Data) ->
-    {next_state, running, Data, [ {timeout, Interval, clean}] };
 handle_event(cast, stop, _State, Data) ->
     {next_state, waiting, Data};
 handle_event(timeout, clean, running, #data{interval = Interval} = Data) ->
