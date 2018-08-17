@@ -10,6 +10,15 @@ start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, noparams).
 
 init(noparams) ->
-    Procs = [],
+    Procs = [
+             sqlite_clean_worker()
+            ],
     Flags = #{},
     {ok, {Flags, Procs}}.
+
+
+
+sqlite_clean_worker() ->
+    #{ id => plugin,
+       start => {ctr_data_sqlite_clean, start_link, []}
+     }.

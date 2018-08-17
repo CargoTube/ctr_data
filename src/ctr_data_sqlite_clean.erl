@@ -42,6 +42,7 @@ init(no_param) ->
 handle_event(cast, start, waiting, _Data) ->
     MaxAge = application:get_env(ctr_data, sqlite_clean_max_age, "31 days"),
     Interval = application:get_env(ctr_data, sqlite_clean_interval, 15)*1000,
+    ok = clean_sqlite_db(),
     {next_state, running, #data{max_age=MaxAge, interval=Interval},
      [{timeout, Interval, clean}] };
 handle_event(cast, start, State, Data) ->
@@ -50,14 +51,18 @@ handle_event(cast, stop, running, Data) ->
     {next_state, waiting, Data};
 handle_event(cast, stop, State, Data) ->
     {next_state, State, Data};
-handle_event(info, clean, running, #data{interval = Interval} = Data) ->
-    lager:debug("sqlite cleaning"),
+handle_event(timeout, clean, running, #data{interval = Interval} = Data) ->
+    ok = clean_sqlite_db(),
     {next_state, running, Data,
      [{timeout, Interval, clean}] };
 handle_event(Event, Content, State, Data) ->
     lager:debug("[~p] ignore event [~p] ~p ~p",[self(), State, Event, Content]),
     {next_state, State, Data}.
 
+
+clean_sqlite_db() ->
+    lager:debug("sqlite cleaning"),
+    ok.
 
 terminate(_Reason, _State, _Data) ->
     ok.
