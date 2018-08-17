@@ -123,6 +123,7 @@ create_table() ->
     Version = ct_data_util:get_table_version(?TABLENAME),
     ok = maybe_drop_table(Version),
     ok = do_create_table(),
+    ok = ctr_data_sqlite_clean:start(),
     ok.
 
 
