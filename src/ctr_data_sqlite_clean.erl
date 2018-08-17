@@ -49,7 +49,7 @@ handle_event(cast, start, State, #data{interval=Interval} = Data) ->
 handle_event(cast, stop, _State, Data) ->
     {next_state, waiting, Data};
 handle_event(timeout, clean, running, #data{interval = Interval} = Data) ->
-    ok = clean_sqlite_db(),
+    ok = clean_sqlite_db(Data),
     {next_state, running, Data, [{timeout, Interval, clean}] };
 handle_event(timeout, clean, State, Data) ->
     {next_state, State, Data};
@@ -58,10 +58,10 @@ handle_event(Event, Content, State, Data) ->
     {next_state, State, Data}.
 
 
-clean_sqlite_db() ->
+clean_sqlite_db(#data{max_age=MaxAge}) ->
     lager:debug("sqlite cleaning"),
-    ctr_data_sqlite_invocation:clean_table(),
-    ctr_data_sqlite_publication:clean_table(),
+    ctr_data_sqlite_invocation:clean_table(MaxAge),
+    ctr_data_sqlite_publication:clean_table(MaxAge),
     ok.
 
 terminate(_Reason, _State, _Data) ->
