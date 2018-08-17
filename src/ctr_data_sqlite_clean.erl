@@ -55,6 +55,7 @@ handle_event(timeout, clean, State, Data) ->
 
 
 clean_sqlite_db(#data{max_age=MaxAge}) ->
+    lager:debug("cleaning sqlite tables"),
     ctr_data_sqlite_invocation:clean_table(MaxAge),
     ctr_data_sqlite_publication:clean_table(MaxAge),
     ok.
