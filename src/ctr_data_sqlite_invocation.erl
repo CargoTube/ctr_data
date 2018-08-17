@@ -7,7 +7,7 @@
 -export([
          add_invocation/1,
          get_invocation/2,
-         delete_invocation/1,
+         remove_invocation/1,
 
          init/0
         ]).
@@ -20,25 +20,18 @@ init() ->
 add_invocation(Invoc) ->
     NewId = ctr_utils:gen_global_id(),
     NewInvoc = Invoc#ctrd_invocation{id = NewId},
-    StoreInvocation =
-        fun() ->
-                case mnesia:wread({ctrd_invocation, NewId}) of
-                    [] ->
-                        ok = mnesia:write(NewInvoc),
-                        {ok, NewInvoc};
-                    _ ->
-                        {error, id_exists}
-                end
-        end,
-    Result = mnesia:transaction(StoreInvocation),
+    Result = do_store(NewInvoc),
     handle_invocation_store_result(Result, NewInvoc).
 
 
-handle_invocation_store_result({atomic, {ok, Invoc}}, _) ->
-    {ok, Invoc};
-handle_invocation_store_result({atomic, {error, id_exists}}, Invoc) ->
-    add_invocation(Invoc).
-
+handle_invocation_store_result([], Invocation) ->
+    {ok, Invocation};
+handle_invocation_store_result(
+  {error,{constraint,"UNIQUE constraint failed: ctrinvocation.id"}}, Invoc) ->
+    NewId = ctr_utils:gen_global_id(),
+    NewInvoc = Invoc#ctrd_invocation{id = NewId},
+    Result = do_store(NewInvoc),
+    handle_invocation_store_result(Result, NewInvoc).
 
 do_store(#ctrd_invocation{id = Id, caller_sess_id = CallerSessId,
                           caller_req_id = CallerReqId, reg_id = RegId,
@@ -49,49 +42,60 @@ do_store(#ctrd_invocation{id = Id, caller_sess_id = CallerSessId,
         "reg_id, ts, procedure, options, arguments, argumentskw, callees, "
         " realm) "
         " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-
     Params = [Id, CallerSessId, CallerReqId, RegId, iso8601:format(TS),
-              Procedure, to_text(Options), to_text(Arguments),
-              to_text(ArgumentsKw), to_text(Callees), Realm],
+              Procedure, to_json(Options), to_json(Arguments),
+              to_json(ArgumentsKw), to_json(Callees), Realm],
     {ok, Con} = ct_data_util:get_sqlite_connection(),
     esqlite3:q(Sql, Params, Con).
 
 
-get_invocation(InvocationId, _Realm) ->
-    FindInvocation =
-        fun() ->
-                case mnesia:read({ctrd_invocation, InvocationId}) of
-                    [Invoc] -> {ok, Invoc};
-                    _ -> {error, not_found}
-                end
-        end,
-    Result = mnesia:transaction(FindInvocation),
-    handle_invocation_find_result(Result).
+get_invocation(InvocationId, Realm) ->
+    {ok, Con} = ct_data_util:get_sqlite_connection(),
+    Sql = "SELECT (id, caller_sess_id, caller_req_id, "
+        "reg_id, ts, procedure, options, arguments, argumentskw, callees, "
+        " realm) "
+        "FROM ctrinvocation WHERE (id = ?, realm = ?)",
+    Params = [InvocationId, Realm],
+    Result = esqlite3:q(Sql, Params, Con),
+    handle_invocation_get_result(Result).
 
 
-handle_invocation_find_result({atomic, {ok, Invocation}}) ->
-    {ok, Invocation};
-handle_invocation_find_result(_) ->
+handle_invocation_get_result([Tuple]) ->
+    {Id, CallerSessId, CallerReqId, RegId, TS_Iso, Procedure, Options_txt,
+     Arguments_txt, ArgumentsKw_txt, Callees_txt, Realm} = Tuple,
+    TS = iso8601:parse(TS_Iso),
+    Options = from_json(Options_txt),
+    Arguments = from_json(Arguments_txt),
+    ArgumentsKw = from_json(ArgumentsKw_txt),
+    Callees = from_json(Callees_txt),
+    {ok, #ctrd_invocation{id = Id, caller_sess_id = CallerSessId,
+                          caller_req_id = CallerReqId, reg_id = RegId,
+                          options = Options, realm = Realm, callees = Callees,
+                          procedure = Procedure, ts = TS, arguments = Arguments,
+                          argumentskw = ArgumentsKw}};
+handle_invocation_get_result(_) ->
     {error, not_found}.
 
 
 
-delete_invocation(#ctrd_invocation{id=Id}) ->
-    DeleteInvocation =
-        fun() ->
-                mnesia:delete({ctrd_invocation, Id})
-        end,
-    Result = mnesia:transaction(DeleteInvocation),
-    handle_invocation_delete_result(Result).
+remove_invocation(#ctrd_invocation{id=Id, realm=Realm}) ->
+    {ok, Con} = ct_data_util:get_sqlite_connection(),
+    Sql = "DELETE FROM ctrinvocation WHERE ( id = ?, realm = ? ) ;",
+    Params = [Id, Realm],
+    Result = esqlite3:q(Sql, Params, Con),
+    handle_invocation_remove_result(Result).
 
-handle_invocation_delete_result({atomic, ok}) ->
+handle_invocation_remove_result([]) ->
     ok;
-handle_invocation_delete_result(Error) ->
+handle_invocation_remove_result(Error) ->
     {error, Error}.
 
 
-to_text(Any) ->
-    io_lib:format("~p", [Any]).
+to_json(Any) ->
+    jsone:encode(Any).
+
+from_json(Json) ->
+    jsone:decode(Json).
 
 create_table() ->
     ok = ct_data_util:setup_sqlite_if_needed(),

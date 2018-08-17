@@ -52,15 +52,19 @@ do_store(#ctr_publication{id = Id, pub_sess_id = PubSessId, options = Options,
     Sql = "INSERT INTO ctrpublication (id, pub_sess_id, options, details, subs,"
         " realm, topic, ts, arguments, argumentskw) "
         " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-    Params = [Id, PubSessId, to_text(Options), to_text(Details), to_text(Subs),
-              Realm, Topic, iso8601:format(TS), to_text(Arguments),
-              to_text(ArgumentsKw)],
+    Params = [Id, PubSessId, to_json(Options), to_json(Details), to_json(Subs),
+              Realm, Topic, iso8601:format(TS), to_json(Arguments),
+              to_json(ArgumentsKw)],
     {ok, Con} = ct_data_util:get_sqlite_connection(),
     esqlite3:q(Sql, Params, Con).
 
 
-to_text(Any) ->
-    io_lib:format("~p", [Any]).
+to_json(Any) ->
+    jsone:encode(Any).
+
+%% from_json(Json) ->
+%%     jsone:decode(Json).
+
 
 create_table() ->
     ok = ct_data_util:setup_sqlite_if_needed(),
