@@ -131,7 +131,7 @@ maybe_drop_table({ok, Version}) when Version == ?TABLEVERSION ->
 maybe_drop_table(_) ->
     {ok, Con} = ct_data_util:get_sqlite_connection(),
     Sql = "DROP TABLE IF EXISTS ctrinvocation;"
-        "DROPT TABLE IF EXISTS ctrinvocation_result;",
+        "DROP TABLE IF EXISTS ctrinvocation_result;",
     ok = esqlite3:exec(Sql, Con),
     ok.
 
