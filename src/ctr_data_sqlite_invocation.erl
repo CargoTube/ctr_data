@@ -177,7 +177,26 @@ do_create_table() ->
     ok = ct_data_util:set_table_version(?TABLENAME,?TABLEVERSION),
     ok.
 
-maybe_clean_table(true, _MaxAge) ->
-    ok;
+maybe_clean_table(true, MaxAge) ->
+    {ok, Con} = ct_data_util:get_sqlite_connection(),
+    Now = iso8601:format(calendar:universaltime()),
+    ok = delete_results(MaxAge, Now, Con),
+    ok = delete_invocations(MaxAge, Now, Con);
 maybe_clean_table(_, _MaxAge) ->
+    ok.
+
+
+delete_invocations(MaxAge, Now, Con) ->
+    SqlTemplate = "DELETE FROM ctrinvocation "
+        "WHERE datatime(ts) < datetime('~s','-~s') ",
+    Sql = io_lib:format(SqlTemplate, [Now, MaxAge]),
+    ok = esqlite3:exec(Sql, Con),
+    ok.
+
+delete_results(MaxAge, Now, Con) ->
+    SqlTemplate = "DELETE FROM ctrinvocation_result "
+        "WHERE id IN (SELECT id FROM ctrinvocation WHERE "
+        "datatime(ts) < datetime('~s','-~s') )",
+    Sql = io_lib:format(SqlTemplate, [Now, MaxAge]),
+    ok = esqlite3:exec(Sql, Con),
     ok.

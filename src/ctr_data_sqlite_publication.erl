@@ -106,7 +106,12 @@ do_create_table() ->
     ok = ct_data_util:set_table_version(?TABLENAME,?TABLEVERSION),
     ok.
 
-maybe_clean_table(true, _MaxAge) ->
+maybe_clean_table(true, MaxAge) ->
+    {ok, Con} = ct_data_util:get_sqlite_connection(),
+    SqlTemplate = "DELETE FROM ctrpublication "
+        "WHERE datetime(ts) < datetime('now','-~s');",
+    Sql = io_lib:format(SqlTemplate, [MaxAge]),
+    ok = esqlite3:exec(Sql, Con),
     ok;
 maybe_clean_table(_, _MaxAge) ->
     ok.
