@@ -25,7 +25,7 @@ store_publication(Pub) ->
     CollectSubs =
         fun(#ctr_subscription{id = SubId, match=Match,
                               subscribers = Subs}, AllSubs) ->
-                [ {SubId, Match,  Subs}  | AllSubs ]
+                [ #{id=>SubId, match=>Match,  subs=>Subs}  | AllSubs ]
         end,
 
     LookupAndStore =
