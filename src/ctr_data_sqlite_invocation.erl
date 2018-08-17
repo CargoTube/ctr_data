@@ -11,12 +11,17 @@
          get_invocation/2,
          remove_invocation/2,
 
+         clean_table/1,
+
          init/0
         ]).
 
 
 init() ->
     create_table().
+
+clean_table(MaxAge) ->
+    maybe_clean_table(?MODULE == ctr_data_invocation_if:get_module(), MaxAge).
 
 
 add_invocation(Invoc) ->
@@ -170,4 +175,9 @@ do_create_table() ->
         "ON ctrinvocation_result (realm);",
     ok = esqlite3:exec(Sql, Con),
     ok = ct_data_util:set_table_version(?TABLENAME,?TABLEVERSION),
+    ok.
+
+maybe_clean_table(true, _MaxAge) ->
+    ok;
+maybe_clean_table(_, _MaxAge) ->
     ok.

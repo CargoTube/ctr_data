@@ -3,7 +3,8 @@
 
 -export([
          initialize/0,
-         do_run/2
+         do_run/2,
+         get_module/0
         ]).
 
 -callback init() -> ok.
@@ -55,3 +56,6 @@ initialize() ->
 
 do_run(Function, Arguments) ->
    apply(?DATA_MODULE(), Function, Arguments).
+
+get_module() ->
+    ?DATA_MODULE().

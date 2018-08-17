@@ -8,11 +8,15 @@
 
 -export([
          store_publication/1,
-         init/0
+         init/0,
+         clean_table/1
          ]).
 
 init() ->
     create_table().
+
+clean_table(MaxAge) ->
+    maybe_clean_table(?MODULE == ctr_data_publication_if:get_module(), MaxAge).
 
 
 store_publication(Pub) ->
@@ -100,4 +104,9 @@ do_create_table() ->
         ");",
     ok = esqlite3:exec(Sql, Con),
     ok = ct_data_util:set_table_version(?TABLENAME,?TABLEVERSION),
+    ok.
+
+maybe_clean_table(true, _MaxAge) ->
+    ok;
+maybe_clean_table(_, _MaxAge) ->
     ok.
