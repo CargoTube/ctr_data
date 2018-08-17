@@ -195,7 +195,7 @@ delete_invocations(MaxAge, Now, Con) ->
 
 delete_results(MaxAge, Now, Con) ->
     SqlTemplate = "DELETE FROM ctrinvocation_result "
-        "WHERE id IN (SELECT id FROM ctrinvocation WHERE "
+        "WHERE invoc_id IN (SELECT id FROM ctrinvocation WHERE "
         "datetime(ts) < datetime('~s','-~s') )",
     Sql = io_lib:format(SqlTemplate, [Now, MaxAge]),
     ok = esqlite3:exec(Sql, Con),
