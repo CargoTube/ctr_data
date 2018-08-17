@@ -55,7 +55,7 @@ get_invocation(InvocationId, Realm) ->
     Sql = "SELECT (id, caller_sess_id, caller_req_id, "
         "reg_id, ts, procedure, options, arguments, argumentskw, callees, "
         " realm) "
-        "FROM ctrinvocation WHERE (id = ?, realm = ?)",
+        "FROM ctrinvocation WHERE id = ? AND realm = ?;",
     Params = [InvocationId, Realm],
     Result = esqlite3:q(Sql, Params, Con),
     handle_invocation_get_result(Result).
@@ -95,8 +95,8 @@ handle_add_result_result(Reason) ->
 
 remove_invocation(Id, Realm) ->
     {ok, Con} = ct_data_util:get_sqlite_connection(),
-    Sql = "DELETE FROM ctrinvocation WHERE ( id = ?, realm = ? ) ;"
-        " DELETE FROM ctrinvocation_result WHERE ( invoc_id = ?, realm = ? );",
+    Sql = "DELETE FROM ctrinvocation WHERE  id = ? AND realm = ? ;"
+        " DELETE FROM ctrinvocation_result WHERE  invoc_id = ? AND realm = ? ;",
     Params = [Id, Realm, Id, Realm],
     Result = esqlite3:q(Sql, Params, Con),
     handle_invocation_remove_result(Result).
