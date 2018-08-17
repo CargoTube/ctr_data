@@ -2,7 +2,7 @@
 -behaviour(ctr_data_invocation_if).
 
 -include("ctr_data.hrl").
--define(TABLEVERSION, 0.1).
+-define(TABLEVERSION, 0.2).
 -define(TABLENAME, "ctrinvocation").
 
 -export([
@@ -131,7 +131,11 @@ maybe_drop_table({ok, Version}) when Version == ?TABLEVERSION ->
 maybe_drop_table(_) ->
     {ok, Con} = ct_data_util:get_sqlite_connection(),
     Sql = "DROP TABLE IF EXISTS ctrinvocation;"
-        "DROP TABLE IF EXISTS ctrinvocation_result;",
+        "DROP INDEX IF EXISTS idx_ctrinvocation_realm;"
+        "DROP TABLE IF EXISTS ctrinvocation_result;"
+        "DROP TABLE IF EXISTS ctrinvocation_ts;"
+        "DROP INDEX IF EXISTS idx_ctrinvocation_result_invoc_id;"
+        "DROP INDEX IF EXISTS idx_ctrinvocation_result_realm;",
     ok = esqlite3:exec(Sql, Con),
     ok.
 
@@ -150,11 +154,19 @@ do_create_table() ->
         " callees TEXT, "
         " realm TEXT NOT NULL "
         "); "
+        "CREATE INDEX IF NOT EXISTS idx_ctrinvocation_realm "
+        "ON ctrinvocation (realm);"
+        "CREATE INDEX IF NOT EXISTS idx_ctrinvocation_ts "
+        "ON ctrinvocation (ts);"
         "CREATE TABLE IF NOT EXISTS ctrinvocation_result ("
         " invoc_id INTEGER NOT NULL, "
         " realm TEXT NOT NULL, "
         " result TEXT NOT NULL"
-        "); " ,
+        "); "
+        "CREATE INDEX IF NOT EXISTS idx_ctrinvocation_result_invoc_id "
+        "ON ctrinvocation_result (invoc_id);"
+        "CREATE INDEX IF NOT EXISTS idx_ctrinvocation_result_realm "
+        "ON ctrinvocation_result (realm);",
     ok = esqlite3:exec(Sql, Con),
     ok = ct_data_util:set_table_version(?TABLENAME,?TABLEVERSION),
     ok.
