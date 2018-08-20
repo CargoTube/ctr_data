@@ -1,6 +1,6 @@
 -module(ctr_data_sqlite_clean).
 
--behaviour(gen_statem).
+-behaviour(gen_server).
 
 
 %%
@@ -11,48 +11,49 @@
 
 %% gen_statem.
 -export([init/1]).
--export([callback_mode/0]).
--export([handle_event/4]).
+-export([handle_call/3]).
+-export([handle_cast/2]).
+-export([handle_info/2]).
 -export([terminate/3]).
 -export([code_change/4]).
 
 
 start_link() ->
-    gen_statem:start_link({local, ?MODULE}, ?MODULE, no_param, []).
+    gen_server:start_link({local, ?MODULE}, ?MODULE, no_param, []).
 
 start() ->
-    gen_statem:cast(?MODULE, start).
+    gen_server:call(?MODULE, start).
 
 stop() ->
-    gen_statem:cast(?MODULE, stop).
+    gen_server:call(?MODULE, stop).
 
--record(data, {
+-record(state, {
+          enabled = false,
           max_age = "14 days",
           interval = 300
          }).
 
-%% use the handle event function
-callback_mode() -> handle_event_function.
-
 init(no_param) ->
-    {ok, waiting, #data{}}.
+    {ok, #state{}}.
 
-
-handle_event(cast, start, _State, #data{max_age = MaxAge, interval=Intv}) ->
-    MaxAge = application:get_env(ctr_data, sqlite_clean_max_age, MaxAge),
+handle_call(start, _From, #state{max_age=MaxAge0, interval=Intv} = State) ->
+    MaxAge = application:get_env(ctr_data, sqlite_clean_max_age, MaxAge0),
     Interval = application:get_env(ctr_data, sqlite_clean_interval, Intv)*1000,
-    {next_state, running, #data{max_age=MaxAge, interval=Interval},
-     [{timeout, 15000, clean}] };
-handle_event(cast, stop, _State, Data) ->
-    {next_state, waiting, Data};
-handle_event(timeout, clean, running, #data{interval = Interval} = Data) ->
-    ok = clean_sqlite_db(Data),
-    {next_state, running, Data, [{timeout, Interval, clean}] };
-handle_event(timeout, clean, State, Data) ->
-    {next_state, State, Data}.
+    {reply, ok, State#state{enabled = true, max_age= MaxAge,
+                            interval=Interval}, 15000};
+handle_call(stop, _From, State) ->
+    {reply, ok, State#state{enabled = false}}.
+
+handle_cast(Msg, State) ->
+    lager:debug("unexpected message: ~p", [Msg]),
+    {noreply, State, 15000}.
+
+handle_info(timeout, #state{enabled = true, interval=Interval} = State) ->
+    ok = clean_sqlite_db(State),
+    {noreply, State, Interval}.
 
 
-clean_sqlite_db(#data{max_age=MaxAge}) ->
+clean_sqlite_db(#state{max_age=MaxAge}) ->
     lager:debug("cleaning sqlite tables"),
     ctr_data_sqlite_invocation:clean_table(MaxAge),
     ctr_data_sqlite_publication:clean_table(MaxAge),
