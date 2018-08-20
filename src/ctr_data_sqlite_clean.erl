@@ -38,7 +38,7 @@ init(no_param) ->
 
 handle_call(start, _From, #state{max_age=MaxAge0, interval=Intv} = State) ->
     MaxAge = application:get_env(ctr_data, sqlite_clean_max_age, MaxAge0),
-    Interval = application:get_env(ctr_data, sqlite_clean_interval, Intv)*1000,
+    Interval = application:get_env(ctr_data, sqlite_clean_interval, Intv),
     {reply, ok, State#state{enabled = true, max_age= MaxAge,
                             interval=Interval}, 15000};
 handle_call(stop, _From, State) ->
@@ -50,7 +50,7 @@ handle_cast(Msg, State) ->
 
 handle_info(timeout, #state{enabled = true, interval=Interval} = State) ->
     ok = clean_sqlite_db(State),
-    {noreply, State, Interval}.
+    {noreply, State, Interval*1000}.
 
 
 clean_sqlite_db(#state{max_age=MaxAge}) ->
